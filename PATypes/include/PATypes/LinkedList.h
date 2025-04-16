@@ -34,6 +34,7 @@ namespace PATypes {
         void append(T item);
         void prepend(T item);
         void insertAt(T item, int index);
+        void removeAt(int index);
         LinkedList<T> *concat(LinkedList<T> *list);
         void map(T (*f)(T));
         PATypes::LinkedList<T> &operator=(const LinkedList<T>& array);
@@ -147,6 +148,10 @@ PATypes::LinkedList<T>::LinkedList(PATypes::LinkedListNode<T> *start, int count)
 
 template<class T>
 PATypes::LinkedList<T>::LinkedList(const LinkedList<T> &list) : size(list.size) {
+    if (list.head == nullptr) {
+        this->head = nullptr;
+        return;
+    }
     this->head = new PATypes::LinkedListNode<T>(list.head->get());
     PATypes::LinkedListNode<T> *current = this->head;
     PATypes::LinkedListNode<T> *intermediate = nullptr;
@@ -225,11 +230,11 @@ PATypes::LinkedList<T> *PATypes::LinkedList<T>::getSubList(int startIndex, int e
         if (current == nullptr)
             throw std::out_of_range("Выход за границы при попытке получения subList LinkedList");
     }
-    for (int i = 0; i <= endIndex; i++) {
-        newList->append(current->get());
-        current = current->getNext();
+    for (int i = startIndex; i <= endIndex; i++) {
         if (current == nullptr)
             throw std::out_of_range("Выход за границы при попытке получения subList LinkedList");
+        newList->append(current->get());
+        current = current->getNext();
     }
     return newList;
 }
@@ -269,6 +274,19 @@ void PATypes::LinkedList<T>::insertAt(T item, int index) {
 }
 
 template<class T>
+void PATypes::LinkedList<T>::removeAt(int index) {
+    if (index < 0 || index >= this->size)
+        throw std::out_of_range("Выход за границы при попытке удаления элемента LinkedList");
+    LinkedListNode<T> *node = this->head;
+    for (int i = 0; i < index - 1; ++i) {
+        node = node->getNext();
+    }
+    node->setNext(node->getNext()->getNext());
+    delete node;
+    return;
+}
+
+template<class T>
 PATypes::LinkedList<T> *PATypes::LinkedList<T>::concat(PATypes::LinkedList<T> *list) {
     PATypes::LinkedListNode<T> *current = &(this->getLastNode());
     PATypes::LinkedListNode<T> *currentOriginal = &(list->getFirstNode());
@@ -296,12 +314,13 @@ void PATypes::LinkedList<T>::map(T (*f)(T)) {
 
 template<class T>
 PATypes::LinkedList<T> &PATypes::LinkedList<T>::operator=(const PATypes::LinkedList<T>& list) {
-    this->head = new PATypes::LinkedListNode<T>(list.head->get());
+    if (list.head != nullptr)
+        this->head = new PATypes::LinkedListNode<T>(list.head->get());
     this->size = list.size;
     PATypes::LinkedListNode<T> *current = this->head;
     PATypes::LinkedListNode<T> *intermediate = nullptr;
     PATypes::LinkedListNode<T> *currentSource = list.head;
-    while (currentSource->getNext() != nullptr) {
+    while (currentSource != nullptr && currentSource->getNext() != nullptr) {
         intermediate = new PATypes::LinkedListNode<T>(currentSource->getNext()->get());
         current->setNext(intermediate);
         current = current->getNext();

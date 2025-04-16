@@ -371,9 +371,9 @@ namespace PATypes {
         if (startIndex < 0 || startIndex >= this->getLength() || endIndex < 0 || endIndex >= this->getLength())
             throw std::out_of_range("Индекс за границами при попытке получения подпоследовательности ImmutableListSequence");
         ImmutableListSequence<T> *current = new ImmutableListSequence<T>();
-        for (int i = startIndex; i <= endIndex; ++i) {
-            current->append(this->get(i));
-        }
+        auto sublist = this->list.getSubList(startIndex, endIndex);
+        current->list = *sublist;
+        delete sublist;
         return current;
     }
 
