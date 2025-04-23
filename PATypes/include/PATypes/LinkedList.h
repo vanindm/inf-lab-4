@@ -263,13 +263,24 @@ void PATypes::LinkedList<T>::prepend(T item) {
 
 template<class T>
 void PATypes::LinkedList<T>::insertAt(T item, int index) {
-    try {
-        PATypes::LinkedListNode<T> &newNode(item);
-        newNode->setNext(this->getNode(index));
-        if (index > 0)
-            this->getNode(index - 1).setNext(newNode);
-    } catch (std::out_of_range&) {
-        throw std::out_of_range("Выход за границы при попытке получения добавить к LinkedList элемент по индексу");
+    if (getLength() == 0) {
+        this->append(item);
+    } else if (index == getLength()) {
+        PATypes::LinkedListNode<T> *newNode = new PATypes::LinkedListNode<T>(item);
+        this->getNode(index - 1).setNext(newNode);
+        ++this->size;
+    } else {
+        try {
+            PATypes::LinkedListNode<T> *newNode = new PATypes::LinkedListNode<T>(item);
+            newNode->setNext(&this->getNode(index));
+            if (index == 0)
+                this->head = newNode;
+            if (index > 0)
+                this->getNode(index - 1).setNext(newNode);
+            ++this->size;
+        } catch (std::out_of_range&) {
+            throw std::out_of_range("Выход за границы при попытке получения добавить к LinkedList элемент по индексу");
+        }
     }
 }
 
@@ -282,6 +293,7 @@ void PATypes::LinkedList<T>::removeAt(int index) {
         node = node->getNext();
     }
     node->setNext(node->getNext()->getNext());
+    --this->size;
     delete node;
     return;
 }

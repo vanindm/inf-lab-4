@@ -289,11 +289,12 @@ namespace PATypes {
 
     template<class T>
     Sequence<T> *ListSequence<T>::insertAt(T item, int index) {
-        if (index < 0 || index >= list.getLength())
+        if (index < 0 || index > list.getLength())
             throw std::out_of_range("при попытке вставить в ListSequence индекс за границами");
         ListSequence<T> *current = Instance();
         try {
-            return current->insertAt(item, index);
+            current->list.insertAt(item, index);
+            return current;
         } catch (std::out_of_range&) {
             throw std::out_of_range("при попытке вставить в ListSequence индекс за границами");
         }
