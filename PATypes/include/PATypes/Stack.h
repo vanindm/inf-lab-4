@@ -22,6 +22,7 @@ namespace PATypes {
         virtual Sequence<T> *insertAt(T item, int index);
         virtual Sequence<T> *concat(Sequence<T> *list);
         virtual Sequence<T> *map(T (*f)(T));
+		virtual T reduce(T (*f)(T, T), T c);
 		Sequence<int> *findSequence(Sequence<T> *toFind);
 		virtual T operator[](int index);
 		Sequence<T>& operator+(Sequence<T> &sequence);
@@ -147,5 +148,10 @@ namespace PATypes {
 			throw std::out_of_range("последовательность не содержится");
 		}
 		return indexes;
+	}
+
+	template<class T>
+	T Stack<T>::reduce(T (*f)(T, T), T c) {
+		return list->reduce(f,c);
 	}
 }

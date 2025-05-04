@@ -4,7 +4,7 @@
 #include "LinkedList.h"
 #include "ICollection.h"
 
-namespace PATypes {
+namespace PATypes {    
     template<class T>
     class Sequence : public ICollection<T> {
     public:
@@ -17,10 +17,24 @@ namespace PATypes {
         virtual Sequence<T> *insertAt(T item, int index) = 0;
         virtual Sequence<T> *concat(Sequence<T> *list) = 0;
         virtual Sequence<T> *map(T (*f)(T)) = 0;
+        virtual T reduce(T (*f)(T, T), T c) = 0;
         virtual T operator[](int index) = 0;
         Sequence<T>& operator+(Sequence<T> &sequence);
         virtual IEnumerator<T> *getEnumerator() = 0;
     };
+
+    template<class T>
+    T _reduce(T (*f)(T, T), Sequence<T>* list, T c) {
+        if (list->getLength() == 1) {
+            return (*f)(list->getFirst(), c);
+        } else {
+            auto subSequence = list->getSubsequence(0, list->getLength() - 2);
+            T result = (*f)(list->getLast(), _reduce(f, subSequence, c));
+            delete subSequence;
+            return result;
+        }
+    }
+
 
     template<class T>
     Sequence<T> &Sequence<T>::operator+(Sequence<T> &sequence) {
@@ -48,6 +62,9 @@ namespace PATypes {
         virtual Sequence<T> *insertAt(T item, int index);
         virtual Sequence<T> *concat(Sequence<T> *list);
         virtual Sequence<T> *map(T (*f)(T));
+        virtual T reduce(T (*f)(T, T), T c) {
+            return _reduce(f, (Sequence<T> *)this, c);
+        }
         T operator[](int index);
         ArraySequence<T>& operator=(const ArraySequence<T>& other);
         ArraySequence<T>& operator=(const ArraySequence<T>&& other);
@@ -237,7 +254,7 @@ namespace PATypes {
     public:
         ListSequence(T *items, int count) : list(items, count) {};
         ListSequence() : list() {};
-        ListSequence(ListSequence<T>& listSequence) : list(listSequence.list) {};
+        ListSequence(const ListSequence<T>& listSequence) : list(listSequence.list) {};
         ListSequence(Sequence<T>& sequence);
         ListSequence(T item) : list(&item, 1) {};
         ~ListSequence() {};
@@ -253,6 +270,9 @@ namespace PATypes {
         virtual Sequence<T> *concat(Sequence<T> *list) = 0;
         Sequence<T> *concat(ListSequence<T> *list);
         virtual Sequence<T> *map(T (*f)(T));
+        virtual T reduce(T (*f)(T, T), T c) {
+            return _reduce(f, Instance(), c);
+        }
         T operator[](int index);
         ListSequence<T>& operator=(const ListSequence<T>& other);
         ListSequence<T>& operator=(const ListSequence<T>&& other);

@@ -4,7 +4,7 @@
 #include "PATypes/DynamicArray.h"
 #include "PATypes/LinkedList.h"
 #include "PATypes/Sequence.h"
-#include "PATypes/MapReduce.h"
+#include "PATypes/MapWhere.h"
 
 int sqr (int a) {
 	return a * a;
@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
 		PATypes::Sequence<int> *mapTest = map(&sqr, &immutTest);
 		assert(mapTest->get(1) == 4);
 
-		int reduceTest = reduce(&sum, &mutTest, 0);
+		int reduceTest = _reduce(&sum, &mutTest, 0);
 		assert(reduceTest == 42);
 
 		PATypes::IEnumerator<int> *enumerator = mutTest.getEnumerator();

@@ -16,9 +16,12 @@ add_executable(queueTestExec         src/queueTest.cpp)
 add_executable(stackTestExec         src/stackTest.cpp)
 add_executable(dequeTestExec         src/dequeTest.cpp)
 
-
 target_include_directories(argParserTestExec PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_include_directories(userInterface PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(dequeTestExec PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(queueTestExec PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(stackTestExec PUBLIC ${PROJECT_SOURCE_DIR}/include)
+
 
 add_subdirectory(PATypes)
 target_link_libraries(arraySequenceTestExec PATypes)

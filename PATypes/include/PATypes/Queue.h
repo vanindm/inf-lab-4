@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Sequence.h"
+#include "MapWhere.h"
 
 namespace PATypes {
 	template<class T>
@@ -22,6 +23,7 @@ namespace PATypes {
         virtual Sequence<T> *insertAt(T item, int index);
         virtual Sequence<T> *concat(Sequence<T> *list);
         virtual Sequence<T> *map(T (*f)(T));
+		virtual T reduce(T (*f)(T, T), T c);
 		virtual T operator[](int index);
 		Sequence<T>& operator+(Sequence<T> &sequence);
 		virtual IEnumerator<T> *getEnumerator();
@@ -147,5 +149,10 @@ namespace PATypes {
 			throw std::out_of_range("последовательность не содержится");
 		}
 		return indexes;
+	}
+
+	template<class T>
+	T Queue<T>::reduce(T (*f)(T, T), T c) {
+		return list->reduce(f, c);
 	}
 }
