@@ -22,6 +22,7 @@ namespace PATypes {
         virtual Sequence<T> *insertAt(T item, int index);
         virtual Sequence<T> *concat(Sequence<T> *list);
         virtual Sequence<T> *map(T (*f)(T));
+		Sequence<int> *findSequence(Sequence<T> *toFind);
 		virtual T operator[](int index);
 		Sequence<T>& operator+(Sequence<T> &sequence);
 		virtual IEnumerator<T> *getEnumerator();
@@ -126,5 +127,25 @@ namespace PATypes {
 	template<class T>
 	IEnumerator<T> *Stack<T>::getEnumerator() {
 		return list->getEnumerator();
+	}
+
+	template<class T>
+	Sequence<int> *Stack<T>::findSequence(Sequence<T>* toFind) {
+		int toFindIndex = 0;
+		int stackIndex = 0;
+		MutableArraySequence<int> *indexes = new MutableArraySequence<int>((size_t)0);
+		int length = toFind->getLength();
+		try {
+			while (toFindIndex < length) {
+				if (toFind->get(toFindIndex) == this->get(stackIndex)) {
+					indexes->append(toFindIndex);
+					++toFindIndex;
+				}
+				++stackIndex;
+			}
+		} catch (std::out_of_range&) {
+			throw std::out_of_range("последовательность не содержится");
+		}
+		return indexes;
 	}
 }
