@@ -44,6 +44,7 @@ void hanoiTowers() {
 	class Green : public IColor {
 	public:
 		Green() {}
+		virtual ~Green() {}
 		virtual int getColor() {
 			return 0;
 		}
@@ -54,8 +55,8 @@ void hanoiTowers() {
 	Green green = Green();
 
 	class HanoiItem : public IHanoiItem {
-	IColor *color;
 	int area;
+	IColor *color;
 	public:
 		HanoiItem(int area, IColor *color) : area(area), color(color) {};
 		virtual ~HanoiItem() {}
