@@ -7,6 +7,7 @@
 
 #include "Person.h"
 #include "argParser.h"
+#include "hanoiTowers.h"
 
 #include <complex>
 
@@ -39,9 +40,84 @@ U *inputSequence() {
 	return newSequence;
 }
 
+void hanoiTowers() {
+	class Green : public IColor {
+	public:
+		Green() {}
+		virtual int getColor() {
+			return 0;
+		}
+		virtual char getRepresentation() {
+			return 'G';
+		}
+	};
+	Green green = Green();
+
+	class HanoiItem : public IHanoiItem {
+	IColor *color;
+	int area;
+	public:
+		HanoiItem(int area, IColor *color) : area(area), color(color) {};
+		virtual ~HanoiItem() {}
+		virtual int getArea() {
+			return area;
+		}
+		IColor *getColor() {
+			return color;
+		}
+		virtual bool compare(IHanoiItem* other) {
+			return area > other->getArea();
+		}
+	};
+
+	PATypes::Stack<HanoiItem *> cleanup;
+
+	int cnt = 0;
+	std::cout << "Введите количество колец\n>>> ";
+	std::cin >> cnt;
+
+	PATypes::MutableArraySequence<IHanoiItem *> items;
+
+	for (int i = 0; i < cnt; ++i) {
+		std::cout << "Введите цвет кольца " << i << "\n>>> ";
+		char c = 'G';
+		std::cin >> c;
+		std::cout << "Введите площадь кольца " << i << "\n>>> ";
+		int area;
+		std::cin >> area;
+		HanoiItem* newItem;
+		switch(c) {
+			case 'G':
+				newItem = new HanoiItem(area, &green);
+				cleanup.push(newItem);
+				items.append(newItem);
+				break;
+			default:
+				std::cout << "Nah!\n";
+		}
+	}
+	int src, dst;
+	std::cout << "Введите начальный стержень\n>>> ";
+	std::cin >> src;
+	std::cout << "Введите конечный стержень\n>>> ";
+	std::cin >> dst;
+	HanoiTower hanoiTower((PATypes::Sequence<IHanoiItem *> *)&items, src, dst);
+	try {
+		hanoiTower.solve();
+	} catch (std::logic_error &error) {
+		std::cout << "Задача нерешаема при текущих входных данных!\n";
+		std::cout << "Ошибка: " << error.what() << "\n";
+	}
+	std::cout << "Задача решаема и была решена!" << "\n";
+	while(cleanup.getLength()) {
+		delete cleanup.pop();
+	}
+	return;
+}
+
 int promptMainMenu() {
 	int i = 0;
-	std::cout << "1. Выбрать АТД\n2. Выйти\n>>> ";
+	std::cout << "1. Выбрать АТД\n2. Ханойские башни\n3. Выйти\n>>> ";
 	std::cin >> i;
 	return i;
 }
@@ -229,6 +305,9 @@ int main(int argc, char *argv[]) {
 				}
 				break;
 			case 2:
+				hanoiTowers();
+				break;
+			case 3:
 				running = false;
 				break;
 		}

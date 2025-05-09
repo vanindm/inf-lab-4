@@ -257,7 +257,7 @@ namespace PATypes {
         ListSequence(const ListSequence<T>& listSequence) : list(listSequence.list) {};
         ListSequence(Sequence<T>& sequence);
         ListSequence(T item) : list(&item, 1) {};
-        ~ListSequence() {};
+        virtual ~ListSequence() {};
         T getFirst();
         T getLast();
         T get(int index);

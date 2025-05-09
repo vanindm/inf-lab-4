@@ -25,7 +25,7 @@ namespace PATypes {
         LinkedList();
         LinkedList(LinkedListNode<T> *start, int count);
         LinkedList(const LinkedList<T> &list);
-        ~LinkedList();
+        virtual ~LinkedList();
         T getFirst();
         T getLast();
         T get(int index);
@@ -47,6 +47,7 @@ namespace PATypes {
 		public:
 			Enumerator(LinkedList<T> &parent) : parent(parent), ptr(parent.head) {}
 			Enumerator(LinkedList<T> &parent, LinkedListNode<T> *ptr) : parent(parent), ptr(ptr) {}
+            virtual ~Enumerator() {}
 			
 			virtual bool moveNext() {
 				if (ptr->getNext() == nullptr) {

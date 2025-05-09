@@ -8,7 +8,7 @@ namespace PATypes {
 		MutableListSequence<T> *list;
 	public:
 		Deque();
-		~Deque();
+		virtual ~Deque();
 		void push_back(const T &element);
 		void push_front(const T &element);
 		T pop_back();

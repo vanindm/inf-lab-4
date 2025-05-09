@@ -9,7 +9,7 @@ namespace PATypes {
 		MutableListSequence<T> *list;
 	public:
 		Queue();
-		~Queue();
+		virtual ~Queue();
 		void push(const T &element);
 		T pop();
 		virtual T getFirst();

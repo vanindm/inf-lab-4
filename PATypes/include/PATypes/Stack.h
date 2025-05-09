@@ -8,7 +8,7 @@ namespace PATypes {
 		MutableListSequence<T> *list;
 	public:
 		Stack();
-		~Stack();
+		virtual ~Stack();
 		void push(const T &element);
 		T pop();
 		virtual T getFirst();
