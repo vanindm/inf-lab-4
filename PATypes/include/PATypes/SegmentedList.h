@@ -5,7 +5,7 @@
 
 namespace PATypes {
 	template<class T>
-	class SegmentedList {
+	class SegmentedList : IEnumerable<T> {
 		int size;
         LinkedListNode<DynamicArray<T>> *head;
         LinkedListNode<DynamicArray<T>> &getNode(int index);

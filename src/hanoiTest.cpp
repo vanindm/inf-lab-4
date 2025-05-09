@@ -15,10 +15,11 @@ int main() {
 	Green green = Green();
 
 	class HanoiItem : public IHanoiItem {
-	IColor *color;
 	int area;
+	IColor *color;
 	public:
 		HanoiItem(int area, IColor *color) : area(area), color(color) {};
+		virtual ~HanoiItem() {};
 		virtual int getArea() {
 			return area;
 		}

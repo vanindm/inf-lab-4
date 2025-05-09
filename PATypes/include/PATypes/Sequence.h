@@ -6,7 +6,7 @@
 
 namespace PATypes {    
     template<class T>
-    class Sequence : public ICollection<T> {
+    class Sequence : public ICollection<T>, IEnumerable<T> {
     public:
         virtual ~Sequence() {};
         virtual T getFirst() = 0;
@@ -42,7 +42,7 @@ namespace PATypes {
     }
 
     template<class T>
-    class ArraySequence : public Sequence<T>, public IEnumerable<T> {
+    class ArraySequence : public Sequence<T> {
     public:
         ArraySequence(T *items, int count) : array(items, count) {}
         ArraySequence() : array(0) {};
@@ -250,7 +250,7 @@ namespace PATypes {
     }
 
     template<class T>
-    class ListSequence : public Sequence<T>, public IEnumerable<T> {
+    class ListSequence : public Sequence<T> {
     public:
         ListSequence(T *items, int count) : list(items, count) {};
         ListSequence() : list() {};
