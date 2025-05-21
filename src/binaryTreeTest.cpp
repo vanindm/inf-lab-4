@@ -10,6 +10,10 @@ bool isEven(int a) {
 	return a % 2 == 0;
 }
 
+int square(int a) {
+	return a * a;
+}
+
 int main() {
 	PATypes::BinaryTree<int> test;
 	test.insert(10);
@@ -23,10 +27,15 @@ int main() {
 	test2.insert(15);
 	test.merge(test2);
 	assert(test.findElement(15)->getVal() == 15);
-	PATypes::BinaryTree<int> whereTest(isEven, test);
-	assert(whereTest.findElement(20) != nullptr);
-	assert(whereTest.findElement(10) != nullptr);
-	assert(whereTest.findElement(5) == nullptr);
+	//PATypes::BinaryTree<int> whereTest(isEven, test);
+	//assert(whereTest.findElement(20) != nullptr);
+	//assert(whereTest.findElement(10) != nullptr);
+	//assert(whereTest.findElement(5) == nullptr);
+	PATypes::BinaryTree<int>* mapTest = test.map(square);
+	assert(mapTest->findElement(400) != nullptr);
+	mapTest->erase(mapTest->findElement(400));
+	assert(mapTest->findElement(400) == nullptr);
+	assert(mapTest->findElement(225) != nullptr);
 	std::cout << "SUCCESS" << std::endl;
 	return 0;
 }

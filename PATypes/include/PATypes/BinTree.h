@@ -9,9 +9,9 @@ namespace PATypes {
 	class BinaryTreeNode {
 		T val;
 		int priority;
-		BinaryTreeNode<T> *l, *r;
+		BinaryTreeNode<T> *l, *r, *parent;
 	public:
-		BinaryTreeNode(T val, int priority, BinaryTreeNode<T> *l = nullptr, BinaryTreeNode<T> *r = nullptr) : val(val), priority(priority), l(l), r(r) {};
+		BinaryTreeNode(T val, int priority, BinaryTreeNode<T> *l = nullptr, BinaryTreeNode<T> *r = nullptr, BinaryTreeNode<T> *parent = nullptr) : val(val), priority(priority), l(l), r(r), parent(parent) {};
 		BinaryTreeNode(const BinaryTreeNode<T> &node);
 		BinaryTreeNode(bool (*f)(T), const BinaryTreeNode<T> &node);
 		~BinaryTreeNode() {
@@ -21,11 +21,13 @@ namespace PATypes {
 		void map(T (*f)(T));
 		BinaryTreeNode<T> *getLeft() const { return l; }
 		BinaryTreeNode<T> *getRight() const { return r; }
+		BinaryTreeNode<T> *getParent() const {return parent; }
 		void setLeft(BinaryTreeNode<T>* n) { this->l = n; }
 		void setRight(BinaryTreeNode<T>* n) { this->r = n; }
+		void setParent(BinaryTreeNode<T> *n) { this->parent = n; }
 
 		int getPriority() { return priority; }
-		T getVal() { return val; }
+		T getVal() const { return val; }
 	};
 
 	template<class T>
@@ -40,9 +42,11 @@ namespace PATypes {
 		BinaryTree<T> *map(T (*f)(T));
 		BinaryTreeNode<T> *_merge(BinaryTreeNode<T> *l, BinaryTreeNode<T> *r);
 		Pair<BinaryTreeNode<T>*, BinaryTreeNode<T>*> _split(BinaryTreeNode<T> *root, T key);
-		BinaryTreeNode<T>* _search(BinaryTreeNode<T> *node, T key);
+		BinaryTreeNode<T>* _search(BinaryTreeNode<T> *node, T key, BinaryTreeNode<T> *parent = nullptr);
 		void _insertAll(const BinaryTreeNode<T> *node);
 		void _insertAllWhere(bool (*f)(T), const BinaryTreeNode<T> *node);
+
+		void erase(BinaryTreeNode<T> *node);
 
 		BinaryTreeNode<T> *getRoot() { return root; };
 		BinaryTreeNode<T> *findElement(T val);
@@ -109,24 +113,18 @@ namespace PATypes {
 
 	template<class T>
 	BinaryTree<T> *BinaryTree<T>::map(T (*f)(T)) {
-		BinaryTree<T> *newTree = new BinaryTree(*root);
+		BinaryTree<T> *newTree = new BinaryTree<T>(*root);
 		newTree->root->map(f);
+		return newTree;
 	}
 
 	template<class T>
 	void BinaryTree<T>::merge(BinaryTree<T> tree) {
-		if (tree.getRoot()->getVal() < getRoot()->getVal()) {
-			root = _merge(tree.getRoot(), root);
-		} else {
-			root = _merge(root, tree.getRoot());
-		}
+		_insertAll(tree.root);
 	}
 	
 	template<class T>
 	BinaryTreeNode<T> *BinaryTree<T>::_merge(BinaryTreeNode<T> *l, BinaryTreeNode<T> *r) {
-		//if (r != nullptr && l != nullptr && l->getVal() >= r->getVal()) {
-		//	throw std::logic_error("слияние нарушит инвариант дерева!");
-		//}
 		if (l == nullptr)
 			return r;
 		if (r == nullptr)
@@ -157,6 +155,10 @@ namespace PATypes {
 	}
 
 	template<class T>
+	void BinaryTree<T>::erase(BinaryTreeNode<T> *node) {
+	}
+
+	template<class T>
 	void BinaryTree<T>::insert(T key) {
 		Pair<BinaryTreeNode<T>*, BinaryTreeNode<T>*> second = _split(root, key);
 		BinaryTreeNode<T> *newNode = new BinaryTreeNode<T>(key, mt());
@@ -164,19 +166,27 @@ namespace PATypes {
 	}
 
 	template<class T>
-	BinaryTreeNode<T>* BinaryTree<T>::_search(BinaryTreeNode<T> *node, T key) {
-		if (node == nullptr || key == node->getVal()) {
+	BinaryTreeNode<T>* BinaryTree<T>::_search(BinaryTreeNode<T> *node, T key, BinaryTreeNode<T> *parent) {
+		if (node == nullptr) {
+			return node;
+		} else if ( key == node->getVal() ) {
+			node->setParent(parent);
 			return node;
 		}
 		if (key < node->getVal()) {
-			return _search(node->getLeft(), key);
+			return _search(node->getLeft(), key, node);
 		} else {
-			return _search(node->getRight(), key);
+			return _search(node->getRight(), key, node);
 		}
 	}
 
 	template<class T>
 	BinaryTreeNode<T> *BinaryTree<T>::findElement(T val) {
 		return _search(root, val);
+	}
+
+	template<class T>
+	BinaryTree<T> BinaryTree<T>::getSubTree(BinaryTreeNode<T> *node) {
+		return BinaryTreeNode<T>(*node);
 	}
 }
