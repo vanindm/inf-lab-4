@@ -9,18 +9,22 @@ namespace PATypes {
 	class BinaryTreeNode {
 		T val;
 		int priority;
-		BinaryTreeNode<T> *l, *r, *parent;
+		BinaryTreeNode<T> *l = nullptr, *r = nullptr, *parent = nullptr;
 	public:
 		BinaryTreeNode(T val, int priority, BinaryTreeNode<T> *l = nullptr, BinaryTreeNode<T> *r = nullptr, BinaryTreeNode<T> *parent = nullptr) : val(val), priority(priority), l(l), r(r), parent(parent) {};
 		BinaryTreeNode(const BinaryTreeNode<T> &node);
 		BinaryTreeNode(bool (*f)(T), const BinaryTreeNode<T> &node);
 		~BinaryTreeNode() {
-		delete l;
-		delete r;
-	}
+			if (l != nullptr)
+				delete l;
+			if (r != nullptr)
+				delete r;
+		}
 		void map(T (*f)(T));
 		BinaryTreeNode<T> *getLeft() const { return l; }
 		BinaryTreeNode<T> *getRight() const { return r; }
+		BinaryTreeNode<T> **getLeftPtr() { return &l; }
+		BinaryTreeNode<T> **getRightPtr() { return &r; }
 		BinaryTreeNode<T> *getParent() const {return parent; }
 		void setLeft(BinaryTreeNode<T>* n) { this->l = n; }
 		void setRight(BinaryTreeNode<T>* n) { this->r = n; }
@@ -32,17 +36,22 @@ namespace PATypes {
 
 	template<class T>
 	class BinaryTree {
-		BinaryTreeNode<T> *root;
+		BinaryTreeNode<T> *root = nullptr;
 		std::mt19937 mt;
 	public:
-		BinaryTree() : root(nullptr), mt(time(nullptr)) {};
+		BinaryTree() : root(nullptr), mt(1337) {};
+		BinaryTree(const BinaryTree<T> &tree);
 		BinaryTree(const BinaryTreeNode<T> &root);
 		BinaryTree(bool (*f)(T), BinaryTree<T> tree);
+		~BinaryTree() {
+			delete root;
+		}
 		void merge(BinaryTree<T> tree);
 		BinaryTree<T> *map(T (*f)(T));
 		BinaryTreeNode<T> *_merge(BinaryTreeNode<T> *l, BinaryTreeNode<T> *r);
 		Pair<BinaryTreeNode<T>*, BinaryTreeNode<T>*> _split(BinaryTreeNode<T> *root, T key);
-		BinaryTreeNode<T>* _search(BinaryTreeNode<T> *node, T key, BinaryTreeNode<T> *parent = nullptr);
+		BinaryTreeNode<T> *_search(BinaryTreeNode<T> *node, T key, BinaryTreeNode<T> *parent = nullptr);
+		void _erase(BinaryTreeNode<T> **current, BinaryTreeNode<T> *toErase);
 		void _insertAll(const BinaryTreeNode<T> *node);
 		void _insertAllWhere(bool (*f)(T), const BinaryTreeNode<T> *node);
 
@@ -76,9 +85,9 @@ namespace PATypes {
 	void BinaryTree<T>::_insertAll(const BinaryTreeNode<T> *node) {
 		if (node != nullptr)
 			this->insert(node->getVal());
-		if (node->getLeft())
+		if (node->getLeft() != nullptr)
 			_insertAll(node->getLeft());
-		if (node->getRight())
+		if (node->getRight() != nullptr)
 			_insertAll(node->getRight());
 	}
 
@@ -108,7 +117,12 @@ namespace PATypes {
 
 	template<class T>
 	BinaryTree<T>::BinaryTree(bool (*f)(T), BinaryTree<T> tree) : mt(time(nullptr)) {
-		this->root = new BinaryTreeNode<T>(*tree.root);
+		this->_insertAllWhere(f, tree.root);
+	}
+
+	template<class T>
+	BinaryTree<T>::BinaryTree(const BinaryTree<T> &tree) {
+		root = new BinaryTreeNode<T>(*tree.root);
 	}
 
 	template<class T>
@@ -156,6 +170,25 @@ namespace PATypes {
 
 	template<class T>
 	void BinaryTree<T>::erase(BinaryTreeNode<T> *node) {
+		_erase(&root, node);
+		delete node;
+	}
+
+	template<class T>
+	void BinaryTree<T>::_erase(BinaryTreeNode<T> **current, BinaryTreeNode<T> *toErase) {
+		if (*current == nullptr) {
+			return;
+		}
+		if (*current == toErase) {
+			*current = _merge(toErase->getLeft(), toErase->getRight());
+		} else if ((*current)->getLeft() == toErase) {
+			(*current)->setLeft(_merge(toErase->getLeft(), toErase->getRight()));
+		} else if ((*current)->getRight() == toErase) {
+			(*current)->setRight(_merge(toErase->getLeft(), toErase->getRight()));
+		} else {
+			_erase(((*current)->getLeftPtr()), toErase);
+			_erase(((*current)->getRightPtr()), toErase);
+		}
 	}
 
 	template<class T>
