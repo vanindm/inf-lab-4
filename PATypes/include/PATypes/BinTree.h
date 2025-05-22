@@ -4,6 +4,7 @@
 #include <ctime>
 #include <string>
 #include "PairTuple.h"
+#include "Sequence.h"
 
 namespace PATypes {
 	enum SearchType {
@@ -32,7 +33,7 @@ namespace PATypes {
 		}
 		void map(T (*f)(T));
 		BinaryTreeNode<T> *getLeft() const {
-			if (this != nullptr && !ltag)
+			if (!ltag)
 				return l;
 			else
 				return nullptr;
@@ -41,7 +42,7 @@ namespace PATypes {
 			return l;
 		}
 		BinaryTreeNode<T> *getRight() const { 
-			if (this != nullptr && !rtag) 
+			if (!rtag) 
 				return r; 
 			else
 				return nullptr;
@@ -50,13 +51,13 @@ namespace PATypes {
 			return r;
 		}
 		BinaryTreeNode<T> **getLeftPtr() {
-			if (this != nullptr && !ltag)
+			if (!ltag)
 				return &l; 
 			else
 				return nullptr;
 		}
 		BinaryTreeNode<T> **getRightPtr() {
-			if (this != nullptr && !rtag)
+			if (!rtag)
 				return &r;
 			else
 				return nullptr;
@@ -86,12 +87,18 @@ namespace PATypes {
 		void _insertAll(const BinaryTreeNode<T> *node);
 		void _insertAllWhere(bool (*f)(T), const BinaryTreeNode<T> *node);
 
-		std::string _KLP(BinaryTreeNode<T> *current, std::string delimiter);
-		std::string _KPL(BinaryTreeNode<T> *current, std::string delimiter);
-		std::string _LPK(BinaryTreeNode<T> *current, std::string delimiter);
-		std::string _LKP(BinaryTreeNode<T> *current, std::string delimiter);
-		std::string _PLK(BinaryTreeNode<T> *current, std::string delimiter);
-		std::string _PKL(BinaryTreeNode<T> *current, std::string delimiter);
+		size_t _size(BinaryTreeNode<T> *current) {
+			if (current == nullptr)
+				return 0;
+			return 1ll + _size(current->getLeft()) + _size(current->getRight());
+		}
+
+		MutableListSequence<T> _KLP(BinaryTreeNode<T> *current);
+		MutableListSequence<T> _KPL(BinaryTreeNode<T> *current);
+		MutableListSequence<T> _LPK(BinaryTreeNode<T> *current);
+		MutableListSequence<T> _LKP(BinaryTreeNode<T> *current);
+		MutableListSequence<T> _PLK(BinaryTreeNode<T> *current);
+		MutableListSequence<T> _PKL(BinaryTreeNode<T> *current);
 
 		void _threadKLP(BinaryTreeNode<T> *current, BinaryTreeNode<T> *lParent, BinaryTreeNode<T> *rParent);
 		void _threadKPL(BinaryTreeNode<T> *current, BinaryTreeNode<T> *lParent, BinaryTreeNode<T> *rParent);
@@ -118,14 +125,20 @@ namespace PATypes {
 		BinaryTree<T> getSubTree(BinaryTreeNode<T> *current);
 		bool treesEqual(BinaryTreeNode<T> *tree1, BinaryTreeNode<T> *tree2);
 
+		size_t getSize() {
+			return _size(root);
+		}
+
 		BinaryTreeNode<T> *subTree(BinaryTree<T> tree);
 
-		std::string KLP(std::string delimiter);
-		std::string KPL(std::string delimiter);
-		std::string LPK(std::string delimiter);
-		std::string LKP(std::string delimiter);
-		std::string PLK(std::string delimiter);
-		std::string PKL(std::string delimiter);
+		//std::string KLP(std::string delimiter);
+		//std::string KPL(std::string delimiter);
+		//std::string LPK(std::string delimiter);
+		//std::string LKP(std::string delimiter);
+		//std::string PLK(std::string delimiter);
+		//std::string PKL(std::string delimiter);
+
+		Sequence<T>* getSearch(SearchType search);
 
 		std::string toString(std::string search);
 
@@ -317,115 +330,91 @@ namespace PATypes {
 	}
 
 	template<class T>
-	std::string BinaryTree<T>::_KLP(BinaryTreeNode<T> *current, std::string delimiter) {
-		std::string result = std::to_string(current->getVal()) + delimiter;
-		if (current->getLeft() != nullptr)
-			result += _KLP(current->getLeft(), delimiter) + delimiter;
-		if (current->getRight() != nullptr)
-			result += _KLP(current->getRight(), delimiter) + delimiter;
+	MutableListSequence<T> BinaryTree<T>::_KLP(BinaryTreeNode<T> *current) {
+		MutableListSequence<T> result(current->getVal());
+		if (current->getLeft() != nullptr) {
+			MutableListSequence<T> left = _KLP(current->getLeft());
+			result.concat(&left);
+		}
+		if (current->getRight() != nullptr) {
+			MutableListSequence<T> right = _KLP(current->getRight());
+			result.concat(&right);
+		}
 		return result;
 	}
 
 	template<class T>
-	std::string BinaryTree<T>::KLP(std::string delimiter) {
-		if (root != nullptr)
-			return _KLP(root, delimiter);
-		else
-			return "";
-	}
-
-	template<class T>
-	std::string BinaryTree<T>::_KPL(BinaryTreeNode<T> *current, std::string delimiter) {
-		std::string result = std::to_string(current->getVal()) + delimiter;
-		if (current->getRight() != nullptr)
-			result += _KLP(current->getRight(), delimiter) + delimiter;
-		if (current->getLeft() != nullptr)
-			result += _KLP(current->getLeft(), delimiter) + delimiter;
+	MutableListSequence<T> BinaryTree<T>::_KPL(BinaryTreeNode<T> *current) {
+		MutableListSequence<T> result(current->getVal());
+		if (current->getRight() != nullptr) {
+			MutableListSequence<T> right = _KPL(current->getRight());
+			result.concat(&right);
+		}
+		if (current->getLeft() != nullptr) {
+			MutableListSequence<T> left = _KPL(current->getLeft());
+			result.concat(&left);
+		}
 		return result;
 	}
 
 	template<class T>
-	std::string BinaryTree<T>::KPL(std::string delimiter) {
-		if (root != nullptr)
-			return _KPL(root, delimiter);
-		else
-			return "";
-	}
-
-	template<class T>
-	std::string BinaryTree<T>::_LPK(BinaryTreeNode<T> *current, std::string delimiter) {
-		std::string result = "";
-		if (current->getLeft() != nullptr)
-			result += _LPK(current->getLeft(), delimiter) + delimiter;
-		if (current->getRight() != nullptr)
-			result += _LPK(current->getRight(), delimiter) + delimiter;
-		result += std::to_string(current->getVal()) + delimiter;
+	MutableListSequence<T> BinaryTree<T>::_LPK(BinaryTreeNode<T> *current) {
+		MutableListSequence<T> result;
+		if (current->getLeft() != nullptr) {
+			MutableListSequence<T> left = _LPK(current->getLeft());
+			result.concat(&left);
+		}
+		if (current->getRight() != nullptr) {
+			MutableListSequence<T> right = _LPK(current->getRight());
+			result.concat(&right);
+		}
+		result += current->getVal();
 		return result;
 	}
 
 	template<class T>
-	std::string BinaryTree<T>::LPK(std::string delimiter) {
-		if (root != nullptr)
-			return _LPK(root, delimiter);
-		else
-			return "";
-	}
-
-	template<class T>
-	std::string BinaryTree<T>::_LKP(BinaryTreeNode<T> *current, std::string delimiter) {
-		std::string result = "";
-		if (current->getLeft() != nullptr)
-			result += _LKP(current->getLeft(), delimiter) + delimiter;
-		result += std::to_string(current->getVal()) + delimiter;
-		if (current->getRight() != nullptr)
-			result += _LKP(current->getRight(), delimiter) + delimiter;
+	MutableListSequence<T> BinaryTree<T>::_LKP(BinaryTreeNode<T> *current) {
+		MutableListSequence<T> result;
+		if (current->getLeft() != nullptr) {
+			MutableListSequence<T> left = _LKP(current->getLeft());
+			result.concat(&left);
+		}
+		result += current->getVal();
+		if (current->getRight() != nullptr) {
+			MutableListSequence<T> right = _LKP(current->getRight());
+			result.concat(&right);
+		}
 		return result;
 	}
 
 	template<class T>
-	std::string BinaryTree<T>::LKP(std::string delimiter) {
-		if (root != nullptr)
-			return _LKP(root, delimiter);
-		else
-			return "";
-	}
-
-	template<class T>
-	std::string BinaryTree<T>::_PLK(BinaryTreeNode<T> *current, std::string delimiter) {
-		std::string result = "";
-		if (current->getRight() != nullptr)
-			result += _PLK(current->getRight(), delimiter) + delimiter;
-		if (current->getLeft() != nullptr)
-			result += _PLK(current->getLeft(), delimiter) + delimiter;
-		result += std::to_string(current->getVal()) + delimiter;
+	MutableListSequence<T> BinaryTree<T>::_PKL(BinaryTreeNode<T> *current) {
+		MutableListSequence<T> result;
+		if (current->getRight() != nullptr) {
+			MutableListSequence<T> right = _PKL(current->getRight());
+			result.concat(&right);
+		}
+		result += current->getVal();
+		if (current->getLeft() != nullptr) {
+			MutableListSequence<T> left = _PKL(current->getLeft());
+			result.concat(&left);
+		}
 		return result;
 	}
 
 	template<class T>
-	std::string BinaryTree<T>::PLK(std::string delimiter) {
-		if (root != nullptr)
-			return _PLK(root, delimiter);
-		else
-			return "";
-	}
-
-	template<class T>
-	std::string BinaryTree<T>::_PKL(BinaryTreeNode<T> *current, std::string delimiter) {
-		std::string result = "";
-		if (current->getRight() != nullptr)
-			result += _PKL(current->getRight(), delimiter) + delimiter;
-		result += std::to_string(current->getVal()) + delimiter;
-		if (current->getLeft() != nullptr)
-			result += _PKL(current->getLeft(), delimiter) + delimiter;
+	MutableListSequence<T> BinaryTree<T>::_PLK(BinaryTreeNode<T> *current) {
+		MutableListSequence<T> result;
+		if (current->getRight() != nullptr) {
+			MutableListSequence<T> right = _PLK(current->getRight());
+			result.concat(&right);
+		}
+		if (current->getLeft() != nullptr) {
+			MutableListSequence<T> left = _PLK(current->getLeft());
+			result.concat(&left);
+		}
+		result += current->getVal();
 		return result;
-	}
-
-	template<class T>
-	std::string BinaryTree<T>::PKL(std::string delimiter) {
-		if (root != nullptr)
-			return _PKL(root, delimiter);
-		else
-			return "";
 	}
 	
 	template<class T>
@@ -525,25 +514,28 @@ namespace PATypes {
 	}
 
 	template<class T>
-	std::string BinaryTree<T>::toString(std::string search) {
-		if (search == "KLP") {
-			return KLP(" ");
+	Sequence<T>* BinaryTree<T>::getSearch(SearchType search) {
+		MutableListSequence<T> result;
+		switch(search) {
+			case KLP:
+				result = _KLP(root);
+				break;
+			case KPL:
+				result = _KPL(root);
+				break;
+			case LPK:
+				result = _LPK(root);
+				break;
+			case LKP:
+				result = _LKP(root);
+				break;
+			case PLK:
+				result = _PLK(root);
+				break;
+			case PKL:
+				result = _PKL(root);
+				break;
 		}
-		if (search == "KPL") {
-			return KPL(" ");
-		}
-		if (search == "LKP") {
-			return LKP(" ");
-		}
-		if (search == "LPK") {
-			return LPK(" ");
-		}
-		if (search == "PKL") {
-			return PKL(" ");
-		}
-		if (search == "PLK") {
-			return PLK(" ");
-		}
-		throw std::logic_error("нет такого обхода");
+		return new ImmutableListSequence<T>(result);
 	}
 }

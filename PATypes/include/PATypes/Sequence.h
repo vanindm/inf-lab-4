@@ -20,6 +20,8 @@ namespace PATypes {
         virtual T reduce(T (*f)(T, T), T c) = 0;
         virtual T operator[](int index) = 0;
         Sequence<T>& operator+(Sequence<T> &sequence);
+        Sequence<T>& operator+(T item);
+        Sequence<T>& operator+=(T item);
         virtual IEnumerator<T> *getEnumerator() = 0;
     };
 
@@ -39,6 +41,16 @@ namespace PATypes {
     template<class T>
     Sequence<T> &Sequence<T>::operator+(Sequence<T> &sequence) {
         return *(this->concat(&sequence));
+    }
+
+    template<class T>
+    Sequence<T> &Sequence<T>::operator+(T item) {
+        return *(this->append(item));
+    }
+
+    template<class T>
+    Sequence<T> &Sequence<T>::operator+=(T item) {
+        return *(this->append(item));
     }
 
     template<class T>
