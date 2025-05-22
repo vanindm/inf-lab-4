@@ -2,13 +2,23 @@
 
 #include <random>
 #include <ctime>
+#include <string>
 #include "PairTuple.h"
 
 namespace PATypes {
+	enum SearchType {
+		KLP,
+		KPL,
+		LPK,
+		LKP,
+		PLK,
+		PKL
+	};
 	template <class T>
 	class BinaryTreeNode {
 		T val;
 		int priority;
+		bool ltag = false, rtag = false;
 		BinaryTreeNode<T> *l = nullptr, *r = nullptr, *parent = nullptr;
 	public:
 		BinaryTreeNode(T val, int priority, BinaryTreeNode<T> *l = nullptr, BinaryTreeNode<T> *r = nullptr, BinaryTreeNode<T> *parent = nullptr) : val(val), priority(priority), l(l), r(r), parent(parent) {};
@@ -21,14 +31,43 @@ namespace PATypes {
 				delete r;
 		}
 		void map(T (*f)(T));
-		BinaryTreeNode<T> *getLeft() const { return l; }
-		BinaryTreeNode<T> *getRight() const { return r; }
-		BinaryTreeNode<T> **getLeftPtr() { return &l; }
-		BinaryTreeNode<T> **getRightPtr() { return &r; }
+		BinaryTreeNode<T> *getLeft() const { 
+			if (!ltag)
+				return l;
+			else
+				return nullptr;
+		}
+		BinaryTreeNode<T> *getLeftT() const {
+			return l;
+		}
+		BinaryTreeNode<T> *getRight() const { 
+			if (!rtag) 
+				return r; 
+			else
+				return nullptr;
+		}
+		BinaryTreeNode<T> *getRightT() const {
+			return r;
+		}
+		BinaryTreeNode<T> **getLeftPtr() {
+			if (!ltag)
+				return &l; 
+			else
+				return nullptr;
+		}
+		BinaryTreeNode<T> **getRightPtr() {
+			if (!rtag)
+				return &r;
+			else
+				return nullptr;
+		}
 		BinaryTreeNode<T> *getParent() const {return parent; }
-		void setLeft(BinaryTreeNode<T>* n) { this->l = n; }
-		void setRight(BinaryTreeNode<T>* n) { this->r = n; }
+		void setLeft(BinaryTreeNode<T>* n) { this->l = n; ltag = false; }
+		void setRight(BinaryTreeNode<T>* n) { this->r = n; rtag = false; }
 		void setParent(BinaryTreeNode<T> *n) { this->parent = n; }
+
+		void setLeftT(BinaryTreeNode<T>* n) { this->l = n; ltag = true; }
+		void setRightT(BinaryTreeNode<T>* n) { this->r = n; rtag = true; }
 
 		int getPriority() { return priority; }
 		T getVal() const { return val; }
@@ -38,6 +77,29 @@ namespace PATypes {
 	class BinaryTree {
 		BinaryTreeNode<T> *root = nullptr;
 		std::mt19937 mt;
+
+		BinaryTreeNode<T> *_merge(BinaryTreeNode<T> *l, BinaryTreeNode<T> *r);
+		Pair<BinaryTreeNode<T>*, BinaryTreeNode<T>*> _split(BinaryTreeNode<T> *root, T key);
+
+		BinaryTreeNode<T> *_search(BinaryTreeNode<T> *node, T key, BinaryTreeNode<T> *parent = nullptr);
+		void _erase(BinaryTreeNode<T> **current, BinaryTreeNode<T> *toErase);
+		void _insertAll(const BinaryTreeNode<T> *node);
+		void _insertAllWhere(bool (*f)(T), const BinaryTreeNode<T> *node);
+
+		std::string _KLP(BinaryTreeNode<T> *current, std::string delimiter);
+		std::string _KPL(BinaryTreeNode<T> *current, std::string delimiter);
+		std::string _LPK(BinaryTreeNode<T> *current, std::string delimiter);
+		std::string _LKP(BinaryTreeNode<T> *current, std::string delimiter);
+		std::string _PLK(BinaryTreeNode<T> *current, std::string delimiter);
+		std::string _PKL(BinaryTreeNode<T> *current, std::string delimiter);
+
+		void _threadKLP(BinaryTreeNode<T> *current, BinaryTreeNode<T> *lParent, BinaryTreeNode<T> *rParent);
+		void _threadKPL(BinaryTreeNode<T> *current, BinaryTreeNode<T> *lParent, BinaryTreeNode<T> *rParent);
+		void _threadLPK(BinaryTreeNode<T> *current, BinaryTreeNode<T> *lParent, BinaryTreeNode<T> *rParent);
+		void _threadLKP(BinaryTreeNode<T> *current, BinaryTreeNode<T> *lParent, BinaryTreeNode<T> *rParent);
+		void _threadPLK(BinaryTreeNode<T> *current, BinaryTreeNode<T> *lParent, BinaryTreeNode<T> *rParent);
+		void _threadPKL(BinaryTreeNode<T> *current, BinaryTreeNode<T> *lParent, BinaryTreeNode<T> *rParent);
+
 	public:
 		BinaryTree() : root(nullptr), mt(1337) {};
 		BinaryTree(const BinaryTree<T> &tree);
@@ -48,20 +110,33 @@ namespace PATypes {
 		}
 		void merge(BinaryTree<T> tree);
 		BinaryTree<T> *map(T (*f)(T));
-		BinaryTreeNode<T> *_merge(BinaryTreeNode<T> *l, BinaryTreeNode<T> *r);
-		Pair<BinaryTreeNode<T>*, BinaryTreeNode<T>*> _split(BinaryTreeNode<T> *root, T key);
-		BinaryTreeNode<T> *_search(BinaryTreeNode<T> *node, T key, BinaryTreeNode<T> *parent = nullptr);
-		void _erase(BinaryTreeNode<T> **current, BinaryTreeNode<T> *toErase);
-		void _insertAll(const BinaryTreeNode<T> *node);
-		void _insertAllWhere(bool (*f)(T), const BinaryTreeNode<T> *node);
-
+		
+		void insert(T key);
 		void erase(BinaryTreeNode<T> *node);
-
 		BinaryTreeNode<T> *getRoot() { return root; };
 		BinaryTreeNode<T> *findElement(T val);
-
-		void insert(T key);
 		BinaryTree<T> getSubTree(BinaryTreeNode<T> *current);
+		bool treesEqual(BinaryTreeNode<T> *tree1, BinaryTreeNode<T> *tree2);
+
+		BinaryTreeNode<T> *subTree(BinaryTree<T> tree);
+
+		std::string KLP(std::string delimiter);
+		std::string KPL(std::string delimiter);
+		std::string LPK(std::string delimiter);
+		std::string LKP(std::string delimiter);
+		std::string PLK(std::string delimiter);
+		std::string PKL(std::string delimiter);
+
+		std::string toString(std::string search);
+
+		void thread(SearchType type);
+
+		void threadKLP() {_threadKLP(root, nullptr, nullptr);}
+		void threadKPL() {_threadKPL(root, nullptr, nullptr);}
+		void threadLPK() {_threadLPK(root, nullptr, nullptr);}
+		void threadLKP() {_threadLKP(root, nullptr, nullptr);}
+		void threadPKL() {_threadPKL(root, nullptr, nullptr);}
+		void threadPLK() {_threadPLK(root, nullptr, nullptr);}
 	};
 
 	template<class T>
@@ -221,5 +296,254 @@ namespace PATypes {
 	template<class T>
 	BinaryTree<T> BinaryTree<T>::getSubTree(BinaryTreeNode<T> *node) {
 		return BinaryTreeNode<T>(*node);
+	}
+
+	template<class T>
+	bool BinaryTree<T>::treesEqual(BinaryTreeNode<T> *tree1, BinaryTreeNode<T> *tree2) {
+		if (tree1 == nullptr && tree2 == nullptr)
+			return true;
+		else if (tree1 == nullptr || tree2 == nullptr)
+			return false;
+		return tree1->getVal() == tree2->getVal() && treesEqual(tree1->getLeft(), tree2->getLeft()) && treesEqual(tree1->getRight(), tree2->getRight());
+	}
+
+	template<class T>
+	BinaryTreeNode<T> * BinaryTree<T>::subTree(BinaryTree<T> tree) {
+		BinaryTreeNode<T> *index = this->_search(tree.root, tree.root->getVal());
+		if(treesEqual(index, tree.root))
+			return index;
+		else
+			return nullptr;
+	}
+
+	template<class T>
+	std::string BinaryTree<T>::_KLP(BinaryTreeNode<T> *current, std::string delimiter) {
+		std::string result = std::to_string(current->getVal()) + delimiter;
+		if (current->getLeft() != nullptr)
+			result += _KLP(current->getLeft(), delimiter) + delimiter;
+		if (current->getRight() != nullptr)
+			result += _KLP(current->getRight(), delimiter) + delimiter;
+		return result;
+	}
+
+	template<class T>
+	std::string BinaryTree<T>::KLP(std::string delimiter) {
+		if (root != nullptr)
+			return _KLP(root, delimiter);
+		else
+			return "";
+	}
+
+	template<class T>
+	std::string BinaryTree<T>::_KPL(BinaryTreeNode<T> *current, std::string delimiter) {
+		std::string result = std::to_string(current->getVal()) + delimiter;
+		if (current->getRight() != nullptr)
+			result += _KLP(current->getRight(), delimiter) + delimiter;
+		if (current->getLeft() != nullptr)
+			result += _KLP(current->getLeft(), delimiter) + delimiter;
+		return result;
+	}
+
+	template<class T>
+	std::string BinaryTree<T>::KPL(std::string delimiter) {
+		if (root != nullptr)
+			return _KPL(root, delimiter);
+		else
+			return "";
+	}
+
+	template<class T>
+	std::string BinaryTree<T>::_LPK(BinaryTreeNode<T> *current, std::string delimiter) {
+		std::string result = "";
+		if (current->getLeft() != nullptr)
+			result += _LPK(current->getLeft(), delimiter) + delimiter;
+		if (current->getRight() != nullptr)
+			result += _LPK(current->getRight(), delimiter) + delimiter;
+		result += std::to_string(current->getVal()) + delimiter;
+		return result;
+	}
+
+	template<class T>
+	std::string BinaryTree<T>::LPK(std::string delimiter) {
+		if (root != nullptr)
+			return _LPK(root, delimiter);
+		else
+			return "";
+	}
+
+	template<class T>
+	std::string BinaryTree<T>::_LKP(BinaryTreeNode<T> *current, std::string delimiter) {
+		std::string result = "";
+		if (current->getLeft() != nullptr)
+			result += _LKP(current->getLeft(), delimiter) + delimiter;
+		result += std::to_string(current->getVal()) + delimiter;
+		if (current->getRight() != nullptr)
+			result += _LKP(current->getRight(), delimiter) + delimiter;
+		return result;
+	}
+
+	template<class T>
+	std::string BinaryTree<T>::LKP(std::string delimiter) {
+		if (root != nullptr)
+			return _LKP(root, delimiter);
+		else
+			return "";
+	}
+
+	template<class T>
+	std::string BinaryTree<T>::_PLK(BinaryTreeNode<T> *current, std::string delimiter) {
+		std::string result = "";
+		if (current->getRight() != nullptr)
+			result += _PLK(current->getRight(), delimiter) + delimiter;
+		if (current->getLeft() != nullptr)
+			result += _PLK(current->getLeft(), delimiter) + delimiter;
+		result += std::to_string(current->getVal()) + delimiter;
+		return result;
+	}
+
+	template<class T>
+	std::string BinaryTree<T>::PLK(std::string delimiter) {
+		if (root != nullptr)
+			return _PLK(root, delimiter);
+		else
+			return "";
+	}
+
+	template<class T>
+	std::string BinaryTree<T>::_PKL(BinaryTreeNode<T> *current, std::string delimiter) {
+		std::string result = "";
+		if (current->getRight() != nullptr)
+			result += _PKL(current->getRight(), delimiter) + delimiter;
+		result += std::to_string(current->getVal()) + delimiter;
+		if (current->getLeft() != nullptr)
+			result += _PKL(current->getLeft(), delimiter) + delimiter;
+		return result;
+	}
+
+	template<class T>
+	std::string BinaryTree<T>::PKL(std::string delimiter) {
+		if (root != nullptr)
+			return _PKL(root, delimiter);
+		else
+			return "";
+	}
+	
+	template<class T>
+	void BinaryTree<T>::_threadKLP(BinaryTreeNode<T> *current, BinaryTreeNode<T> *lParent, BinaryTreeNode<T> *rParent) {
+		if (current == nullptr)
+			return;
+		if (lParent != nullptr && current->getLeftT() == nullptr)
+			current->setLeftT(lParent);
+		if (rParent != nullptr && current->getRightT() == nullptr)
+			current->setRightT(lParent);
+		_threadKLP(current->getLeft(), current, nullptr);
+		_threadKLP(current->getRight(), nullptr, current);
+	}
+
+	template<class T>
+	void BinaryTree<T>::_threadKPL(BinaryTreeNode<T> *current, BinaryTreeNode<T> *lParent, BinaryTreeNode<T> *rParent) {
+		if (current == nullptr)
+			return;
+		if (lParent != nullptr && current->getLeftT() == nullptr)
+			current->setLeftT(lParent);
+		if (rParent != nullptr && current->getRightT() == nullptr)
+			current->setRightT(lParent);
+		_threadKPL(current->getRight(), nullptr, current);
+		_threadKPL(current->getLeft(), current, nullptr);
+	}
+	
+	template<class T>
+	void BinaryTree<T>::_threadLPK(BinaryTreeNode<T> *current, BinaryTreeNode<T> *lParent, BinaryTreeNode<T> *rParent) {
+		_threadLPK(current->getLeft(), current, nullptr);
+		_threadLPK(current->getRight(), nullptr, current);
+		if (current == nullptr)
+			return;
+		if (lParent != nullptr && current->getLeftT() == nullptr)
+			current->setLeftT(lParent);
+		if (rParent != nullptr && current->getRightT() == nullptr)
+			current->setRightT(lParent);
+	}
+	
+	template<class T>
+	void BinaryTree<T>::_threadLKP(BinaryTreeNode<T> *current, BinaryTreeNode<T> *lParent, BinaryTreeNode<T> *rParent) {
+		_threadLKP(current->getLeft(), current, nullptr);
+		if (current == nullptr)
+			return;
+		if (lParent != nullptr && current->getLeftT() == nullptr)
+			current->setLeftT(lParent);
+		if (rParent != nullptr && current->getRightT() == nullptr)
+			current->setRightT(lParent);
+		_threadLKP(current->getRight(), nullptr, current);
+	}
+	
+	template<class T>
+	void BinaryTree<T>::_threadPLK(BinaryTreeNode<T> *current, BinaryTreeNode<T> *lParent, BinaryTreeNode<T> *rParent) {
+		_threadPLK(current->getRight(), nullptr, current);
+		_threadPLK(current->getLeft(), current, nullptr);
+		if (current == nullptr)
+			return;
+		if (lParent != nullptr && current->getLeftT() == nullptr)
+			current->setLeftT(lParent);
+		if (rParent != nullptr && current->getRightT() == nullptr)
+			current->setRightT(lParent);
+	}
+
+	template<class T>
+	void BinaryTree<T>::_threadPKL(BinaryTreeNode<T> *current, BinaryTreeNode<T> *lParent, BinaryTreeNode<T> *rParent) {
+		_threadPLK(current->getRight(), nullptr, current);
+		if (current == nullptr)
+			return;
+		if (lParent != nullptr && current->getLeftT() == nullptr)
+			current->setLeftT(lParent);
+		if (rParent != nullptr && current->getRightT() == nullptr)
+			current->setRightT(lParent);
+		_threadPLK(current->getLeft(), current, nullptr);
+	}
+
+	template<class T>
+	void BinaryTree<T>::thread(SearchType type) {
+		switch(type) {
+			case KLP:
+				_threadKLP(root, nullptr, nullptr);
+				break;
+			case KPL:
+				_threadKPL(root, nullptr, nullptr);
+				break;
+			case LPK:
+				_threadLPK(root, nullptr, nullptr);
+				break;
+			case LKP:
+				_threadLKP(root, nullptr, nullptr);
+				break;
+			case PLK:
+				_threadPLK(root, nullptr, nullptr);
+				break;
+			case PKL:
+				_threadPKL(root, nullptr, nullptr);
+				break;
+		}
+	}
+
+	template<class T>
+	std::string BinaryTree<T>::toString(std::string search) {
+		if (search == "KLP") {
+			return KLP(" ");
+		}
+		if (search == "KPL") {
+			return KPL(" ");
+		}
+		if (search == "LKP") {
+			return LKP(" ");
+		}
+		if (search == "LPK") {
+			return LPK(" ");
+		}
+		if (search == "PKL") {
+			return PKL(" ");
+		}
+		if (search == "PLK") {
+			return PLK(" ");
+		}
+		throw std::logic_error("нет такого обхода");
 	}
 }

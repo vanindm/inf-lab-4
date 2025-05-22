@@ -36,6 +36,8 @@ int main() {
 	mapTest->erase(mapTest->findElement(400));
 	assert(mapTest->findElement(400) == nullptr);
 	assert(mapTest->findElement(225) != nullptr);
+	assert(test.subTree(test) != nullptr);
+	std::cout << test.KPL(" ") << std::endl;
 	std::cout << "SUCCESS" << std::endl;
 	delete mapTest;
 	return 0;
