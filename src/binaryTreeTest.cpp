@@ -10,7 +10,15 @@ bool isEven(int a) {
 	return a % 2 == 0;
 }
 
+bool isEven(double a) {
+	return (int) a % 2 == 0;
+}
+
 int square(int a) {
+	return a * a;
+}
+
+double square(double a) {
 	return a * a;
 }
 
@@ -37,8 +45,30 @@ int main() {
 	assert(mapTest->findElement(400) == nullptr);
 	assert(mapTest->findElement(225) != nullptr);
 	assert(test.subTree(test) != nullptr);
-	std::cout << test.KPL(" ") << std::endl;
+	PATypes::BinaryTree<double> testf;
+	testf.insert(10.5);
+	assert(testf.getRoot()->getVal() == 10.5);
+	assert(testf.getRoot()->getVal() != 5.6);
+	assert(testf.findElement(10.5)->getVal() == 10.5);
+	assert(testf.findElement(5) == nullptr);
+	testf.insert(20.9998);
+	assert(testf.findElement(20.9998)->getVal() == 20.9998);
+	PATypes::BinaryTree<double> test2f;
+	test2f.insert(15.123);
+	testf.merge(test2f);
+	assert(testf.findElement(15.123)->getVal() == 15.123);
+	PATypes::BinaryTree<double> whereTestf(isEven, testf);
+	assert(whereTestf.findElement(20.9998) != nullptr);
+	assert(whereTestf.findElement(10.5) != nullptr);
+	assert(whereTestf.findElement(5.0) == nullptr);
+	PATypes::BinaryTree<double>* mapTestf = testf.map(square);
+	assert(mapTestf->findElement(440.99160004000004) != nullptr);
+	mapTestf->erase(mapTestf->findElement(440.99160004000004));
+	assert(mapTestf->findElement(440.99160004) == nullptr);
+	assert(mapTestf->findElement(228.70512899999997) != nullptr);
+	assert(testf.subTree(testf) != nullptr);
 	std::cout << "SUCCESS" << std::endl;
 	delete mapTest;
+	delete mapTestf;
 	return 0;
 }

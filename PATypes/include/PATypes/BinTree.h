@@ -31,8 +31,8 @@ namespace PATypes {
 				delete r;
 		}
 		void map(T (*f)(T));
-		BinaryTreeNode<T> *getLeft() const { 
-			if (!ltag)
+		BinaryTreeNode<T> *getLeft() const {
+			if (this != nullptr && !ltag)
 				return l;
 			else
 				return nullptr;
@@ -41,7 +41,7 @@ namespace PATypes {
 			return l;
 		}
 		BinaryTreeNode<T> *getRight() const { 
-			if (!rtag) 
+			if (this != nullptr && !rtag) 
 				return r; 
 			else
 				return nullptr;
@@ -50,13 +50,13 @@ namespace PATypes {
 			return r;
 		}
 		BinaryTreeNode<T> **getLeftPtr() {
-			if (!ltag)
+			if (this != nullptr && !ltag)
 				return &l; 
 			else
 				return nullptr;
 		}
 		BinaryTreeNode<T> **getRightPtr() {
-			if (!rtag)
+			if (this != nullptr && !rtag)
 				return &r;
 			else
 				return nullptr;
