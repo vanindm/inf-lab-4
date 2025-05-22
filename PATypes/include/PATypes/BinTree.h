@@ -5,6 +5,7 @@
 #include <string>
 #include "PairTuple.h"
 #include "Sequence.h"
+#include "ComplexHack.h"
 
 namespace PATypes {
 	enum SearchType {

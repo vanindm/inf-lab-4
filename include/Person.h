@@ -15,6 +15,18 @@ struct PersonID {
 	friend int operator== (const PersonID &a, const PersonID &b) {
 		return a.series == b.series && a.number == b.number;
 	}
+	friend int operator< (const PersonID &a, const PersonID &b) {
+		return (a.number < b.number) <= (a.series < b.series);
+	}
+	friend int operator<= (const PersonID &a, const PersonID &b) {
+		return (a.number <= b.number) <= (a.series <= b.series);
+	}
+	friend int operator> (const PersonID &a, const PersonID &b) {
+		return (a.number > b.number) <= (a.series > b.series);
+	}
+	friend int operator>= (const PersonID &a, const PersonID &b) {
+		return (a.number >= b.number) <= (a.series > b.series);
+	}
 };
 
 class Person {
@@ -56,4 +68,10 @@ public:
 		return a.id == b.id && a.firstName == b.firstName && a.middleName == b.middleName && a.lastName == b.lastName;
 	}
 
+	friend int operator< (const Person &a, const Person &b) {
+		return a.id < b.id;
+	}
+	friend int operator<= (const Person &a, const Person &b) {
+		return a.id <= b.id;
+	}
 };

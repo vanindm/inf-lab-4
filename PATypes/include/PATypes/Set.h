@@ -12,6 +12,8 @@ namespace PATypes {
 		Set() : tree() {}
 		Set(BinaryTree<T> &tree) : tree(tree) {}
 		Set(Set<T> &set) : tree(set.tree) {}
+		//Set(Sequence<T> *sequence) : tree() {
+		//}
 		Set(bool (*f)(T), Set<T> &set) {
 			tree = BinaryTree<T>(f, tree);
 		}
@@ -33,10 +35,10 @@ namespace PATypes {
 		}
 		virtual T get(size_t index);
 		virtual size_t getCount() { return tree.getSize(); };
-		void unite(const Set<T> &set2) {
+		void unite(Set<T> &set2) {
 			tree.merge(set2.tree);
 		}
-		void intersect(const Set<T> &set2) {
+		void intersect(Set<T> &set2) {
 			size_t treeSize = getCount();
 			for (size_t i = 0; i < treeSize; ++i) {
 				T element = get(i);
@@ -44,7 +46,7 @@ namespace PATypes {
 					erase(element);
 			}
 		}
-		void difference(const Set<T> &set2) {
+		void difference(Set<T> &set2) {
 			size_t treeSize = set2.getCount();
 			for (size_t i = 0; i < treeSize; ++i) {
 				T element = set2.get(i);
@@ -52,7 +54,7 @@ namespace PATypes {
 					erase(element);
 			}
 		}
-		bool hasSubSet(const Set<T> &set2) {
+		bool hasSubSet(Set<T> &set2) {
 			bool result = true;
 			size_t treeSize = set2.getCount();
 			for (size_t i = 0; i < treeSize && result; ++i) {
@@ -61,7 +63,7 @@ namespace PATypes {
 			}
 			return result;
 		}
-		bool equal(const Set<T> &set2) {
+		bool equal(Set<T> &set2) {
 			bool result = (getCount() == set2.getCount());
 			size_t treeSize = getCount();
 			for (size_t i = 0; result && i < treeSize; ++i) {

@@ -4,6 +4,7 @@
 #include "PATypes/Stack.h"
 #include "PATypes/Queue.h"
 #include "PATypes/Deque.h"
+#include "PATypes/Set.h"
 
 #include "Person.h"
 #include "argParser.h"
@@ -40,85 +41,9 @@ U *inputSequence() {
 	return newSequence;
 }
 
-void hanoiTowers() {
-	class Green : public IColor {
-	public:
-		Green() {}
-		virtual ~Green() {}
-		virtual int getColor() {
-			return 0;
-		}
-		virtual char getRepresentation() {
-			return 'G';
-		}
-	};
-	Green green = Green();
-
-	class HanoiItem : public IHanoiItem {
-	int area;
-	IColor *color;
-	public:
-		HanoiItem(int area, IColor *color) : area(area), color(color) {};
-		virtual ~HanoiItem() {}
-		virtual int getArea() {
-			return area;
-		}
-		IColor *getColor() {
-			return color;
-		}
-		virtual bool compare(IHanoiItem* other) {
-			return area > other->getArea();
-		}
-	};
-
-	PATypes::Stack<HanoiItem *> cleanup;
-
-	int cnt = 0;
-	std::cout << "Введите количество колец\n>>> ";
-	std::cin >> cnt;
-
-	PATypes::MutableArraySequence<IHanoiItem *> items;
-
-	for (int i = 0; i < cnt; ++i) {
-		std::cout << "Введите цвет кольца " << i << "\n>>> ";
-		char c = 'G';
-		std::cin >> c;
-		std::cout << "Введите площадь кольца " << i << "\n>>> ";
-		int area;
-		std::cin >> area;
-		HanoiItem* newItem;
-		switch(c) {
-			case 'G':
-				newItem = new HanoiItem(area, &green);
-				cleanup.push(newItem);
-				items.append(newItem);
-				break;
-			default:
-				std::cout << "Nah!\n";
-		}
-	}
-	int src, dst;
-	std::cout << "Введите начальный стержень\n>>> ";
-	std::cin >> src;
-	std::cout << "Введите конечный стержень\n>>> ";
-	std::cin >> dst;
-	HanoiTower hanoiTower((PATypes::Sequence<IHanoiItem *> *)&items, src, dst);
-	try {
-		hanoiTower.solve();
-	} catch (std::logic_error &error) {
-		std::cout << "Задача нерешаема при текущих входных данных!\n";
-		std::cout << "Ошибка: " << error.what() << "\n";
-	}
-	std::cout << "Задача решаема и была решена!" << "\n";
-	while(cleanup.getLength()) {
-		delete cleanup.pop();
-	}
-	return;
-}
-
 int promptMainMenu() {
 	int i = 0;
-	std::cout << "1. Выбрать АТД\n2. Ханойские башни\n3. Выйти\n>>> ";
+	std::cout << "1. Двоичное дерево\n2. Множество\n3. Выйти\n>>> ";
 	std::cin >> i;
 	return i;
 }
@@ -131,106 +56,100 @@ int promptType() {
 
 }
 
-int promptADT() {
-	int i = 0;
-	std::cout << "1. Стек\n2. Очередь\n3. Дек\n>>> ";
-	std::cin >> i;
-	return i;
-}
-
-template<class T, class DS>
-void ads() {
-	DS ads;
-	int op;
-	PATypes::Sequence<T> *seq;
-	PATypes::Sequence<int> *idx;
-	T val;
-	while(true) {
-		std::cout << "1. Вставить\n2. Убрать\n3. Найти подпоследовательность\n4. Выйти\n>>> ";
-		std::cin >> op;
-		switch(op) {
-			case 1:
-				std::cout << "Введите значение\n>>> ";
-				std::cin >> val;
-				ads.push(val);
-				break;
-			case 2:
-				std::cout << ads.pop() << "\n";
-				break;
-			case 3:
-				seq = inputSequence<T, PATypes::MutableArraySequence<T>>();
-				idx = ads.findSequence(seq);
-				outputSequence<int>(idx);
-				std::cout << "\n";
-				delete idx;
-				delete seq;
-				break;
-			case 4:
-				exit(0);
-				break;
-		}
-	}
-}
-
 template<class T>
-void deque() {
-	PATypes::Deque<T> deque;
+void setTest() {
+	PATypes::Set<T> set;
+	PATypes::Set<T> set2;
 	int op;
-	PATypes::Sequence<T> *seq;
-	PATypes::Sequence<int> *idx;
 	T val;
+	PATypes::Sequence<T> *seq;
 	while(true) {
-		std::cout << "1. Вставить\n2. Убрать\n3. Найти подпоследовательность\n4. Выйти\n>>> ";
+		std::cout << "1. Вставить\n2. Убрать\n3. Проверить на вхождение\n4. Объединить\n5. Пересечь\n6. Вычесть\n7. Проверить на включение\n8. Проверить на равенство\n9. Выйти\n>>> ";
 		std::cin >> op;
 		switch(op) {
 			case 1:
-				std::cout << "1. В начало\n2. В конец\n>>> ";
-				std::cin >> op;
 				std::cout << "Введите значение\n>>> ";
 				std::cin >> val;
-				switch(op) {
-					case 1:
-						deque.push_front(val);
-						break;
-					case 2:
-						deque.push_back(val);
-						break;
-				}
+				set.insert(val);
 				break;
 			case 2:
-				std::cout << "1. Из начала\n2. Из конца\n>>> ";
-				std::cin >> op;
-				switch(op) {
-					case 1:
-						std::cout << deque.pop_front() << "\n";
-						break;
-					case 2:
-						std::cout << deque.pop_back() << "\n";
-						break;
+				try {
+					set.erase(val);
+				} catch (std::exception&) {
+					std::cout << "Ошибка: нет такого элемента в множестве!" << "\n";
 				}
 				break;
 			case 3:
-				seq = inputSequence<T, PATypes::MutableArraySequence<T>>();
-				idx = deque.findSequence(seq);
-				outputSequence<int>(idx);
-				std::cout << "\n";
-				delete idx;
-				delete seq;
+				std::cout << "Введите значение\n>>> ";
+				std::cin >> val;
+				if (set.contains(val))
+					std::cout << "Входит в множество" << "\n";
+				else 
+					std::cout << "Не входит в множество\n";
 				break;
 			case 4:
+				seq = inputSequence<T, PATypes::MutableArraySequence<T>>();
+				set2 = PATypes::Set<T>();
+				if (seq->getLength() > 0)
+					set2.insert(seq->getFirst());
+				for (PATypes::IEnumerator<T> *enumerator = seq->getEnumerator(); enumerator->moveNext();) {
+					set2.insert(enumerator->current());
+				}
+				set.unite(set2);
+				break;
+			case 5:
+				seq = inputSequence<T, PATypes::MutableArraySequence<T>>();
+				set2 = PATypes::Set<T>();
+				if (seq->getLength() > 0)
+					set2.insert(seq->getFirst());
+				for (PATypes::IEnumerator<T> *enumerator = seq->getEnumerator(); enumerator->moveNext();) {
+					set2.insert(enumerator->current());
+				}
+				set.intersect(set2);
+				break;
+			case 6:
+				seq = inputSequence<T, PATypes::MutableArraySequence<T>>();
+				set2 = PATypes::Set<T>();
+				if (seq->getLength() > 0)
+					set2.insert(seq->getFirst());
+				for (PATypes::IEnumerator<T> *enumerator = seq->getEnumerator(); enumerator->moveNext();) {
+					set2.insert(enumerator->current());
+				}
+				set.difference(set2);
+				break;
+			case 7:
+				seq = inputSequence<T, PATypes::MutableArraySequence<T>>();
+				set2 = PATypes::Set<T>();
+				if (seq->getLength() > 0)
+					set2.insert(seq->getFirst());
+				for (PATypes::IEnumerator<T> *enumerator = seq->getEnumerator(); enumerator->moveNext();) {
+					set2.insert(enumerator->current());
+				}
+				if (set.hasSubSet(set2)) {
+					std::cout << "Данное множество входит\n";
+				} else {
+					std::cout << "Данное множество не входит\n";
+				}
+				break;
+			case 8:
+				seq = inputSequence<T, PATypes::MutableArraySequence<T>>();
+				set2 = PATypes::Set<T>();
+				if (seq->getLength() > 0)
+					set2.insert(seq->getFirst());
+				for (PATypes::IEnumerator<T> *enumerator = seq->getEnumerator(); enumerator->moveNext();) {
+					set2.insert(enumerator->current());
+				}
+				if (set.equal(set2)) {
+					std::cout << "Множества равны\n";
+				} else {
+					std::cout << "Множества не равны\n";
+				}
+				break;
+			case 9:
 				exit(0);
 				break;
 		}
 	}
-}
-
-
-void stackString() {
-
-}
-
-void stackStudents() {
-
 }
 
 int main(int argc, char *argv[]) {
@@ -244,69 +163,26 @@ int main(int argc, char *argv[]) {
 	while(running) {
 		switch(promptMainMenu())
 		{
-			case 1:
-				switch(promptADT()) {
+			case 2:
+				switch(promptType()) {
 					case 1:
-						switch(promptType()) {
-							case 1:
-								ads<int, PATypes::Stack<int>>();
-								break;
-							case 2:
-								ads<double, PATypes::Stack<double>>();
-								break;
-							case 3:
-								ads<std::complex<double>, PATypes::Stack<std::complex<double>>>();
-								break;
-							case 4:
-								ads<Person, PATypes::Stack<Person>>();
-								break;
-							case 5:
-								ads<Person, PATypes::Stack<Person>>();
-								break;
-						}
+						setTest<int>();
 						break;
 					case 2:
-						switch(promptType()) {
-							case 1:
-								ads<int, PATypes::Queue<int>>();
-								break;
-							case 2:
-								ads<double, PATypes::Queue<double>>();
-								break;
-							case 3:
-								ads<std::complex<double>, PATypes::Queue<std::complex<double>>>();
-								break;
-							case 4:
-								ads<Person, PATypes::Queue<Person>>();
-								break;
-							case 5:
-								ads<Person, PATypes::Queue<Person>>();
-								break;
-						}
+						setTest<double>();
 						break;
 					case 3:
-						switch(promptType()) {
-							case 1:
-								deque<int>();
-								break;
-							case 2:
-								deque<double>();
-								break;
-							case 3:
-								deque<std::complex<double>>();
-								break;
-							case 4:
-								deque<Person>();
-								break;
-							case 5:
-								deque<Person>();
-								break;
-						}
+						setTest<std::complex<double>>();
+						break;
+					case 4:
+						setTest<Person>();
+						break;
+					case 5:
+						setTest<Person>();
 						break;
 				}
 				break;
-			case 2:
-				hanoiTowers();
+			case 1:
 				break;
 			case 3:
 				running = false;
